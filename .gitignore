@@ -1,3 +1,13 @@
 # Python cache
 __pycache__/
 *.py[cod]
+
+# Virtual environment
+.venv/
+venv/
+
+# pytest
+.pytest_cache/
+
+# VS Code
+.vscode/
