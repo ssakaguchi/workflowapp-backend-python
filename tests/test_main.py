@@ -7,21 +7,23 @@ def test_health_check(client):
 
 def test_get_applications(client):
 
-    client.post(
+    post_response_1 = client.post(
         "/applications",
         json={
             "title": "出張申請",
             "content": "東京への出張申請です。",
         },
     )
+    assert post_response_1.status_code == 201
 
-    client.post(
+    post_response_2 = client.post(
         "/applications",
         json={
             "title": "備品購入申請",
             "content": "キーボード購入の申請です。",
         },
     )
+    assert post_response_2.status_code == 201
 
     response = client.get("/applications")
 
@@ -41,9 +43,9 @@ def test_get_application_by_id(client):
             "content": "東京への出張申請です。",
         },
     )
+    assert created_response.status_code == 201
 
     application_id = created_response.json()["id"]
-
     response = client.get(f"/applications/{application_id}")
 
     assert response.status_code == 200
