@@ -32,24 +32,6 @@ class CreateApplicationRequest(BaseModel):
     content: str
 
 
-applications: list[ApplicationResponse] = [
-    ApplicationResponse(
-        id=1,
-        title="出張申請",
-        content="東京への出張申請です。",
-        status="Pending",
-        created_at=datetime.now(),
-    ),
-    ApplicationResponse(
-        id=2,
-        title="備品購入申請",
-        content="キーボード購入の申請です。",
-        status="Approved",
-        created_at=datetime.now(),
-    ),
-]
-
-
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
@@ -57,6 +39,15 @@ def health_check():
 
 @app.get("/applications", response_model=list[ApplicationResponse])
 def get_applications(db: Annotated[Session, Depends(get_db)]):
+    """
+    すべての申請を取得する
+    Arguments:
+        db: データベースセッション
+    Returns:
+        list[Application]: 取得した申請のリスト
+    Raises:
+        HTTPException: データベースエラーが発生した場合
+    """
     statement = select(Application)
     applications = db.scalars(statement).all()
 
@@ -64,12 +55,24 @@ def get_applications(db: Annotated[Session, Depends(get_db)]):
 
 
 @app.get("/applications/{application_id}", response_model=ApplicationResponse)
-def get_application_by_id(application_id: int):
-    for application in applications:
-        if application.id == application_id:
-            return application
+def get_application_by_id(application_id: int, db: Annotated[Session, Depends(get_db)]):
+    """
+    申請IDに基づいて申請を取得する
 
-    raise HTTPException(status_code=404, detail="Application not found")
+    Arguments:
+        application_id: 申請ID
+    Returns:
+        Application: 取得した申請
+    Raises:
+        HTTPException: 申請が見つからない場合
+    """
+
+    application = db.get(Application, application_id)
+
+    if application is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    return application
 
 
 @app.post("/applications", response_model=ApplicationResponse, status_code=201)

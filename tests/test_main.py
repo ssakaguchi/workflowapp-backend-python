@@ -34,7 +34,17 @@ def test_get_applications(client):
 
 
 def test_get_application_by_id(client):
-    response = client.get("/applications/1")
+    created_response = client.post(
+        "/applications",
+        json={
+            "title": "出張申請",
+            "content": "東京への出張申請です。",
+        },
+    )
+
+    application_id = created_response.json()["id"]
+
+    response = client.get(f"/applications/{application_id}")
 
     assert response.status_code == 200
     application = response.json()
