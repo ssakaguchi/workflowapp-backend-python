@@ -6,11 +6,8 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.base import Base
-from app.db.database import engine, get_db
+from app.db.database import get_db
 from app.models.application import Application
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
