@@ -48,7 +48,7 @@ def get_applications(db: Annotated[Session, Depends(get_db)]):
     Raises:
         HTTPException: データベースエラーが発生した場合
     """
-    statement = select(Application)
+    statement = select(Application).order_by(Application.id)
     applications = db.scalars(statement).all()
 
     return applications
