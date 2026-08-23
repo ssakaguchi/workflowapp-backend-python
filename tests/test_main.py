@@ -48,7 +48,7 @@ def test_get_application_by_id(client):
 
     assert response.status_code == 200
     application = response.json()
-    assert application["id"] == 1
+    assert application["id"] == application_id
     assert application["title"] == "出張申請"
 
 
