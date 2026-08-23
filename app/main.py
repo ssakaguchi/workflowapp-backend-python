@@ -41,7 +41,7 @@ def get_applications(db: Annotated[Session, Depends(get_db)]):
     Arguments:
         db: データベースセッション
     Returns:
-        list[Application]: 取得した申請のリスト
+        list[ApplicationResponse]: 取得した申請のリスト
     Raises:
         HTTPException: データベースエラーが発生した場合
     """
