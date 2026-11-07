@@ -1,13 +1,14 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.application import Application
+from app.service import get_application_service
+from app.service.application import ApplicationService
 
 app = FastAPI()
 
@@ -35,41 +36,44 @@ def health_check():
 
 
 @app.get("/applications", response_model=list[ApplicationResponse])
-def get_applications(db: Annotated[Session, Depends(get_db)]):
+def get_applications(
+    service: Annotated[
+        ApplicationService,
+        Depends(get_application_service),
+    ],
+):
     """
-    すべての申請を取得する
+    Serviceを通じてすべての申請を取得する
     Arguments:
-        db: データベースセッション
+        service: 申請取得処理を担当するService
     Returns:
-        list[ApplicationResponse]: 取得した申請のリスト
+        list[Application]: レスポンスの元になる申請のリスト
     Raises:
-        HTTPException: データベースエラーが発生した場合
+        SQLAlchemyError: DBアクセス時にSQLAlchemyのエラーが発生した場合
     """
-    statement = select(Application).order_by(Application.id)
-    applications = db.scalars(statement).all()
-
-    return applications
+    return service.get_applications()
 
 
 @app.get("/applications/{application_id}", response_model=ApplicationResponse)
-def get_application_by_id(application_id: int, db: Annotated[Session, Depends(get_db)]):
+def get_application_by_id(
+    application_id: int,
+    service: Annotated[
+        ApplicationService,
+        Depends(get_application_service),
+    ],
+):
     """
-    申請IDに基づいて申請を取得する
-
+    指定IDの申請をServiceから取得する
     Arguments:
-        application_id: 申請ID
+        application_id: 取得する申請のID
+        service: 申請取得処理を担当するService
     Returns:
-        Application: 取得した申請
+        Application: レスポンスの元になる申請
     Raises:
-        HTTPException: 申請が見つからない場合
+        HTTPException: 指定IDの申請が見つからない場合（404）
+        SQLAlchemyError: DBアクセス時にSQLAlchemyのエラーが発生した場合
     """
-
-    application = db.get(Application, application_id)
-
-    if application is None:
-        raise HTTPException(status_code=404, detail="Application not found")
-
-    return application
+    return service.get_application_by_id(application_id)
 
 
 @app.post("/applications", response_model=ApplicationResponse, status_code=201)
