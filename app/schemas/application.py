@@ -19,5 +19,3 @@ class ApplicationResponse(BaseModel):
 class CreateApplicationRequest(BaseModel):
     title: str
     content: str
-
-
